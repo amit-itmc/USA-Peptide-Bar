@@ -9,6 +9,7 @@ import cartRouter from "../modules/cart/cart.routes.js";
 import orderRouter from "../modules/order/order.routes.js";
 import salesRepRoutes from "../modules/sales-rep/sales-rep.routes.js";
 import couponRouter from "../modules/coupon/coupon.routes.js";
+import settingsRouter from "../modules/settings/settings.routes.js";
 
 
 export const apiRouter = Router();
@@ -38,6 +39,7 @@ apiRouter.use("/wholesale", wholesaleRoutes);
  apiRouter.use("/orders", orderRouter);
  apiRouter.use("/sales-rep", salesRepRoutes);
  apiRouter.use("/coupons", couponRouter);
+ apiRouter.use("/settings", settingsRouter);
 
 
 export default apiRouter;
