@@ -9,13 +9,13 @@ export const orderController = {
       
       // Since we use FormData, order data is in req.body.data as a JSON string
       const orderData = typeof req.body.data === 'string' ? JSON.parse(req.body.data) : req.body;
-      const { formData, items, totalAmount } = orderData;
+      const { formData, items, totalAmount, promoCode } = orderData;
       
       const screenshot = req.file ? req.file.filename : null;
 
       const result = await orderService.createOrder(
         userId, 
-        { ...formData, totalAmount, payment_screenshot: screenshot }, 
+        { ...formData, totalAmount, promoCode, payment_screenshot: screenshot }, 
         items
       );
       

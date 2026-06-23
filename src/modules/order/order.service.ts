@@ -1,5 +1,6 @@
 import { db } from "../../db/knex.js";
 import { sendOrderCompletionEmail, sendOrderCancellationEmail, sendOrderConfirmationEmail, sendAdminOrderNotificationEmail } from "../../utils/mailer.js";
+import { couponService } from "../coupon/coupon.service.js";
 
 
 export const orderService = {
@@ -34,6 +35,28 @@ export const orderService = {
         currentCommissionRate = rep?.commission_rate || 0;
       }
 
+      let appliedPromoCode = null;
+      let discountAmount = 0;
+      let finalTotalAmount = data.totalAmount;
+
+      if (data.promoCode) {
+        try {
+          const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+          const coupon = await couponService.validateCoupon(data.promoCode, subtotal);
+          appliedPromoCode = coupon.code;
+          if (coupon.type === "percentage") {
+            discountAmount = (subtotal * coupon.value) / 100;
+          } else {
+            discountAmount = coupon.value;
+          }
+          finalTotalAmount = Math.max(0, subtotal - discountAmount);
+          // Increment usage
+          await couponService.incrementUsage(coupon.id);
+        } catch (error) {
+          throw new Error(`Promo code error: ${error instanceof Error ? error.message : "Invalid code"}`);
+        }
+      }
+
       const [insertedId] = await trx("orders")
         .insert({
           user_id: userId,
@@ -48,7 +71,9 @@ export const orderService = {
           payment_method: data.paymentMethod,
           payment_screenshot: data.payment_screenshot,
           payment_id: data.paymentId,
-          total_amount: data.totalAmount,
+          total_amount: data.promoCode ? finalTotalAmount : data.totalAmount,
+          applied_promo_code: appliedPromoCode,
+          discount_amount: discountAmount,
           status: "pending",
           sales_rep_id: finalSalesRepId,
           commission_rate: currentCommissionRate,

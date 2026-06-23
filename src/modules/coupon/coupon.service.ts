@@ -40,5 +40,29 @@ export const couponService = {
 
   async incrementUsage(id: number): Promise<void> {
     await db("coupons").where("id", id).increment("usage_count", 1);
+  },
+
+  async getAllCoupons(): Promise<Coupon[]> {
+    return db("coupons").orderBy("created_at", "desc");
+  },
+
+  async createCoupon(data: Partial<Coupon>): Promise<Coupon> {
+    if (data.code) {
+      data.code = data.code.toUpperCase();
+    }
+    const [id] = await db("coupons").insert(data);
+    return db("coupons").where({ id }).first() as unknown as Coupon;
+  },
+
+  async updateCoupon(id: number, data: Partial<Coupon>): Promise<Coupon> {
+    if (data.code) {
+      data.code = data.code.toUpperCase();
+    }
+    await db("coupons").where({ id }).update(data);
+    return db("coupons").where({ id }).first() as unknown as Coupon;
+  },
+
+  async deleteCoupon(id: number): Promise<void> {
+    await db("coupons").where({ id }).del();
   }
 };
