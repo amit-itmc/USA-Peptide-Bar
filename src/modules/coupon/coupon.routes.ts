@@ -4,7 +4,7 @@ import { authMiddleware } from "../../middlewares/auth.js";
 
 const couponRouter = Router();
 
-couponRouter.post("/validate", authMiddleware, couponController.validateCoupon);
+couponRouter.post("/validate", couponController.validateCoupon);
 
 // Admin routes (assuming authMiddleware + role check handles admin, we just add them here)
 couponRouter.get("/", authMiddleware, couponController.getAllCoupons);
